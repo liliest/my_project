@@ -20,10 +20,14 @@ function make_slides(f) {
     start: function() {
       $('.attention_questions').hide();
       $(".err").hide();
+      
 
       var aud = document.getElementById("audio_player");
+      aud.play();
       
       $("#audio_player").bind("ended", function () {
+        console.log("audio ended");
+        aud.setAttribute("controls", "controls")
         $('.attention_questions').show();
       });
           
@@ -64,12 +68,19 @@ function make_slides(f) {
 
       var aud = document.getElementById("stim");
       aud.src = "audio/"+stim.audio
+      exp.plays = 0;
       aud.load();
       aud.play();
-      
+      exp.plays++;
+
       $("#stim").bind("ended", function () {
+        aud.setAttribute("controls", "controls")
         $('.trial_questions').show();
       });
+
+      if (aud.paused == false){
+        console.log("played again")
+      }
  
           $('input[name="generous"]:checked').removeAttr('checked');
           $('input[name="lazy"]:checked').removeAttr('checked');
@@ -127,7 +138,7 @@ function make_slides(f) {
         "slide_type": "critical_trial",
         "stim" : this.stim.clip,
         "audio" : this.stim.audio,
-        "response" : exp.response,
+        "response" : [exp.response,exp.plays],
     });
 
     }
