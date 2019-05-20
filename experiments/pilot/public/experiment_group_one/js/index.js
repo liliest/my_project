@@ -67,20 +67,16 @@ function make_slides(f) {
       $(".trial_questions").hide();
 
       var aud = document.getElementById("stim");
+      aud.removeAttribute("controls");
       aud.src = "audio/"+stim.audio
-      exp.plays = 0;
       aud.load();
       aud.play();
-      exp.plays++;
+
 
       $("#stim").bind("ended", function () {
-        aud.setAttribute("controls", "controls")
+        aud.setAttribute("controls", "controls");
         $('.trial_questions').show();
       });
-
-      if (aud.paused == false){
-        console.log("played again")
-      }
  
           $('input[name="generous"]:checked').removeAttr('checked');
           $('input[name="lazy"]:checked').removeAttr('checked');
@@ -125,6 +121,9 @@ function make_slides(f) {
       else {
         var aud = document.getElementById("audio_player");
         aud.pause();
+        aud.removeAttribute("controls");
+
+
         this.log_responses();
         _stream.apply(this);
 
@@ -138,7 +137,7 @@ function make_slides(f) {
         "slide_type": "critical_trial",
         "stim" : this.stim.clip,
         "audio" : this.stim.audio,
-        "response" : [exp.response,exp.plays],
+        "response" : exp.response,
     });
 
     }
@@ -185,7 +184,7 @@ function init() {
   exp.trials = [];
   exp.catch_trials = [];
 
-  //exp.condition = _.sample(["condition1", "condition2"]);
+  exp.condition = "group_one";
 
   items_group_one = [
     {clip: "X", audio: "X.wav"},

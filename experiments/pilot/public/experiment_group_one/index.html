@@ -11,6 +11,7 @@
     <script src="shared/js/underscore-min.js"></script>
     <!-- if you want to draw stuff: -->
     <!-- <script src="shared/js/raphael-min.js"></script> -->
+    <script src="shared/js/uniqueturker.js"></script>
 
     <!-- cocolab experiment logic -->
     <script src="shared/js/exp-V2.js"></script>
@@ -33,6 +34,15 @@
 
     <!-- experiment file -->
     <script src="js/index.js"></script>
+
+    <script type="text/JavaScript">
+	    $(document).ready(function(){
+		  var ut_id = "a352eab7008d5fd6ef1dbf6bfc9a1e8e";
+		  if (UTWorkerLimitReached(ut_id)) {
+		    $(".slide").hide();
+		    $("body").html("You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT' to avoid any impact on your approval rating.");
+		}});
+    </script>
 
 </head>
 
