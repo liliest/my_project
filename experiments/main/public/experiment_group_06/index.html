@@ -1,0 +1,252 @@
+<html>
+
+<head>
+	<title>Social Perception</title>
+
+    <!--JS-->
+
+    <!-- external general utilities -->
+    <script src="shared/js/jquery-1.11.1.min.js"></script>
+    <script src="shared/full-projects/jquery-ui/jquery-ui.min.js"></script>
+    <script src="shared/js/underscore-min.js"></script>
+    <!-- if you want to draw stuff: -->
+    <!-- <script src="shared/js/raphael-min.js"></script> -->
+    <script src="shared/js/uniqueturker.js"></script>
+
+    <!-- cocolab experiment logic -->
+    <script src="shared/js/exp-V2.js"></script>
+    <script src="shared/js/stream-V2.js"></script>
+
+    <!-- cocolab general utilities -->
+    <script src="shared/js/mmturkey.js "></script>
+    <script src="shared/js/browserCheck.js"></script>
+    <script src="shared/js/utils.js"></script>
+    <!-- if you want to draw cute creatures (depends on raphael): -->
+    <!-- <script src="shared/js/ecosystem.js"></script> -->
+
+    <!-- experiment specific helper functions -->
+    <!-- <script src="js/local-utils.js"></script> -->
+
+    <!--CSS-->
+    <link href="shared/full-projects/jquery-ui/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+    <link href="shared/css/cocolab-style.css" rel="stylesheet" type="text/css"/>
+    <link href="css/local-style.css" rel="stylesheet" type="text/css"/>
+
+    <!-- experiment file -->
+    <script src="js/index.js"></script>
+
+    <script type="text/JavaScript">
+	    $(document).ready(function(){
+		  var ut_id = "a352eab7008d5fd6ef1dbf6bfc9a1e8e";
+		  if (UTWorkerLimitReached(ut_id)) {
+		    $(".slide").hide();
+		    $("body").html("You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT' to avoid any impact on your approval rating.");
+		}});
+    </script>
+
+</head>
+
+<body onload="init();">
+	<noscript>This task requires JavaScript.</noscript>
+	
+	<div class="slide" id="i0" >
+		<p id="cocolab">Stanford Linguistics</p>
+   		<p id="instruct-text">You will be asked to give your opinions about the voices of four people. This HIT should take ~10 minutes.</p>
+   		<button id="start_button" type="button">Start Experiment</button>
+    	<br><br>
+    	<i><small><small><strong><br>LEGAL INFORMATION</strong>:<br><br>We invite you to participate in a research study on language production and comprehension.<br>Your experimenter will ask you to do a linguistic task such as reading sentences or words, naming pictures or describing scenes, making up sentences of your own, or participating in a simple language game.<br><br>You will be paid for your participation at the posted rate.<br><br>There are no risks or benefits of any kind involved in this study.<br><br>If you have read this form and have decided to participate in this experiment, please understand your participation is voluntary and you have the right to withdraw your consent or discontinue participation at any time without penalty or loss of benefits to which you are otherwise entitled. You have the right to refuse to do particular tasks. Your individual privacy will be maintained in all published and written data resulting from the study.<br>You may print this form for your records.<br><br>CONTACT INFORMATION:<br>If you have any questions, concerns or complaints about this research study, its procedures, risks and benefits, you should contact the Protocol Director Meghan Sumner at <br>(650)-725-9336<br><br>If you are not satisfied with how this study is being conducted, or if you have any concerns, complaints, or general questions about the research or your rights as a participant, please contact the Stanford Institutional Review Board (IRB) to speak to someone independent of the research team at (650)-723-2480 or toll free at 1-866-680-2906. You can also write to the Stanford IRB, Stanford University, 3000 El Camino Real, Five Palo Alto Square, 4th Floor, Palo Alto, CA 94306 USA.<br><br>If you agree to participate, please proceed to the study tasks.<br><br></small></small></i>
+    	<!--Consent form used in Stanford linguistics department and is good for ling245. Otherwise, modified to whatever is required for you given your affiliation.-->
+    </div>
+		
+	<!--Instruction slide-->
+	<div class="slide" id="instructions">
+  		<h3>Instructions</h3>
+  		<p>During this HIT you will be asked to listen to four audio clips of four different people reading the same passage. After each recording, you will be asked to share your impressions and/or opinions about each person. This study will take about 10 minutes to complete.</p>
+  		<button onclick="_s.button()">Continue</button>
+	</div>
+
+	<div class="slide" id="attention_check">
+  		<h3>Instructions</h3>
+  		<p>Listen to the following audio clip, making sure that the volume on your headphones or computer is set appropriately.</p>
+  		 <div id="audio_container">
+      		<audio id="audio_player"> 
+          		<source src="audio/salad.wav" id="audio_src_wav" type="audio/wav"> 
+        		Your browser does not support the audio element. 
+        	</audio>
+    	</div> 
+	    <div class="attention_questions">
+	      <p>What was this interaction about?</p>
+	      <br>
+	      <label><input type="radio" name="food" value="Cake"/>Cake</label>
+	      <label><input type="radio" name="food" value="Pizza"/>Pizza</label>
+	      <label><input type="radio" name="food" value="Sushi"/>Sushi</label>
+	      <label><input type="radio" name="food" value="Salad"/>Salad</label>
+	      <label><input type="radio" name="food" value="Sandwiches"/>Sandwiches</label>
+	      <label><input type="radio" name="food" value="Mushrooms"/>Mushrooms</label>
+	      <br><br>
+    	<button onclick="_s.button()">Continue</button>
+    	<div class="err">You selected the wrong answer. If you select the wrong answer again, you will be disqualified from this study.</div>
+    	</div> 
+	</div>
+
+  	<div class="slide" id="one_slider">
+    	<p>Please listen to the recording of the following person.</p>
+    	<div id="audio_container">
+      		<audio id="stim"> 
+          		<source src="" id="audio_src_wav" type="audio/wav"> 
+        		Your browser does not support the audio element. 
+        	</audio>
+    	</div> 
+    	<div class="trial_questions">
+	        <p> Now describe your impressions of the person using the adjectives below:</p>
+	        <table id = 'likertlist'>
+	          <tr><td align="right">generous</td><td>
+	          <label><input type="radio"  name="generous" value="1"/></label>
+	          <label><input type="radio"  name="generous" value="2"/></label>
+	          <label><input type="radio"  name="generous" value="3"/></label>
+	          <label><input type="radio"  name="generous" value="4"/></label>
+	          <label><input type="radio"  name="generous" value="5"/></label>
+	          <label><input type="radio"  name="generous" value="6"/></label>
+	          <label><input type="radio"  name="generous" value="7"/></label> </td><td align="left">greedy</td></tr>
+	          <tr><td align="right">lazy</td><td> <label><input type="radio"  name="lazy" value="1"/></label>
+	          <label><input type="radio"  name="lazy" value="2"/></label>
+	          <label><input type="radio"  name="lazy" value="3"/></label>
+	          <label><input type="radio"  name="lazy" value="4"/></label>
+	          <label><input type="radio"  name="lazy" value="5"/></label>
+	          <label><input type="radio"  name="lazy" value="6"/></label>
+	          <label><input type="radio"  name="lazy" value="7"/></label> </td><td align="left">hardworking</td></tr>
+	          <tr><td align="right">prudish</td><td><label><input type="radio"  name="prudish" value="1"/></label>
+	          <label><input type="radio"  name="prudish" value="2"/></label>
+	          <label><input type="radio"  name="prudish" value="3"/></label>
+	          <label><input type="radio"  name="prudish" value="4"/></label>
+	          <label><input type="radio"  name="prudish" value="5"/></label>
+	          <label><input type="radio"  name="prudish" value="6"/></label>
+	          <label><input type="radio"  name="prudish" value="7"/></label> </td><td align="left">promiscuous</td></tr>
+	          <tr><td align="right">effeminate</td><td><label><input type="radio"  name="effeminate" value="1"/></label>
+	          <label><input type="radio"  name="effeminate" value="2"/></label>
+	          <label><input type="radio"  name="effeminate" value="3"/></label>
+	          <label><input type="radio"  name="effeminate" value="4"/></label>
+	          <label><input type="radio"  name="effeminate" value="5"/></label>
+	          <label><input type="radio"  name="effeminate" value="6"/></label>
+	          <label><input type="radio"  name="effeminate" value="7"/></label> </td><td align="left">masculine</td></tr>
+	          <tr><td align="right">aloof</td><td><label><input type="radio"  name="aloof" value="1"/></label>
+	          <label><input type="radio"  name="aloof" value="2"/></label>
+	          <label><input type="radio"  name="aloof" value="3"/></label>
+	          <label><input type="radio"  name="aloof" value="4"/></label>
+	          <label><input type="radio"  name="aloof" value="5"/></label>
+	          <label><input type="radio"  name="aloof" value="6"/></label>
+	          <label><input type="radio"  name="aloof" value="7"/></label> </td><td align="left">friendly</td></tr>
+	          <tr><td align="right">straight</td><td><label><input type="radio"  name="straight" value="1"/></label>
+	          <label><input type="radio"  name="straight" value="2"/></label>
+	          <label><input type="radio"  name="straight" value="3"/></label>
+	          <label><input type="radio"  name="straight" value="4"/></label>
+	          <label><input type="radio"  name="straight" value="5"/></label>
+	          <label><input type="radio"  name="straight" value="6"/></label>
+	          <label><input type="radio"  name="straight" value="7"/></label></td><td align="left">gay</td></tr>
+	          <tr><td align="right">neat</td><td> <label><input type="radio"  name="neat" value="1"/></label>
+	          <label><input type="radio"  name="neat" value="2"/></label>
+	          <label><input type="radio"  name="neat" value="3"/></label>
+	          <label><input type="radio"  name="neat" value="4"/></label>
+	          <label><input type="radio"  name="neat" value="5"/></label>
+	          <label><input type="radio"  name="neat" value="6"/></label>
+	          <label><input type="radio"  name="neat" value="7"/></label> </td><td align="left">messy</td></tr>
+	          <tr><td align="right">savvy</td><td><label><input type="radio"  name="savvy" value="1"/></label>
+	          <label><input type="radio"  name="savvy" value="2"/></label>
+	          <label><input type="radio"  name="savvy" value="3"/></label>
+	          <label><input type="radio"  name="savvy" value="4"/></label>
+	          <label><input type="radio"  name="savvy" value="5"/></label>
+	          <label><input type="radio"  name="savvy" value="6"/></label>
+	          <label><input type="radio"  name="savvy" value="7"/></label> </td><td align="left">naive</td></tr>
+	          <tr><td align="right">kind</td><td> <label><input type="radio"  name="kind" value="1"/></label>
+	          <label><input type="radio"  name="kind" value="2"/></label>
+	          <label><input type="radio"  name="kind" value="3"/></label>
+	          <label><input type="radio"  name="kind" value="4"/></label>
+	          <label><input type="radio"  name="kind" value="5"/></label>
+	          <label><input type="radio"  name="kind" value="6"/></label>
+	          <label><input type="radio"  name="kind" value="7"/></label> </td><td align="left">mean</td></tr>
+	          <tr><td align="right">genuine</td><td><label><input type="radio"  name="genuine" value="1"/></label>
+	          <label><input type="radio"  name="genuine" value="2"/></label>
+	          <label><input type="radio"  name="genuine" value="3"/></label>
+	          <label><input type="radio"  name="genuine" value="4"/></label>
+	          <label><input type="radio"  name="genuine" value="5"/></label>
+	          <label><input type="radio"  name="genuine" value="6"/></label>
+	          <label><input type="radio"  name="genuine" value="7"/></label> </td><td align="left">fake</td></tr>
+	        </table>
+	      	</p>
+    		<button onclick="_s.button()">Continue</button>
+    	</div>
+    	<div class="err">Please adjust the slider before continuing.</div>
+  	</div>
+
+
+	<div class="slide"  id="subj_info">
+	    <div class="long_form">
+	      <div class="subj_info_title">Additional information</div>
+	      <p class="info">Answering these questions is optional, but will help us understand your answers.</p>
+	      <p>Did you read the instructions and do you think you did the HIT correctly?</p>
+	      <label><input type="radio"  name="assess" value="No"/>No</label>
+	      <label><input type="radio"  name="assess" value="Yes"/>Yes</label>
+	      <label><input type="radio"  name="assess" value="Confused"/>I was confused</label>
+
+	      <p>Were there any problems or bugs in the experiment?</p>
+	      <textarea id="problems" rows="2" cols="50"></textarea>
+
+	      <p>What do you think is a fair price for the work you did?</p>
+	      <textarea id="fairprice" rows="1" cols="10"></textarea>
+
+	      <p>Gender:
+	        <select id="gender">
+	          <label><option value=""/></label>
+	          <label><option value="Male"/>Male</label>
+	          <label><option value="Female"/>Female</label>
+	          <label><option value="Other"/>Other</label>
+	        </select>
+	      </p>
+
+	      <p>Age: <input type="text" id="age"/></p>
+
+	      <p>Level Of Education:
+	        <select id="education">
+	          <label><option value="-1"/></label>
+	          <label><option value="0"/>Some High School</label>
+	          <label><option value="1"/>Graduated High School</label>
+	          <label><option value="2"/>Some College</label>
+	          <label><option value="3"/>Graduated College</label>
+	          <label><option value="4"/>Hold a higher degree</label>
+	        </select>
+	      </p>
+
+	      <p>Native Language: <input type="text" id="language"/></p>
+	      <label>(the language(s) spoken at home when you were a child)</label>
+
+	      <p>Did you enjoy the hit?</p>
+	      <select id="enjoyment">
+	        <label><option value="-1"></option></label>
+	        <label><option value="0">Worse than the Average HIT</option></label>
+	        <label><option value="1" >An Average HIT</option></label>
+	        <label><option value="2">Better than average HIT</option></label>
+	      </select>
+
+	      <p>We would be interested in any comments you have about this experiment. Please type them here:</p>
+	      <textarea id="comments" rows="3" cols="50"></textarea>
+	      <br/>
+	      <button onclick="_s.submit()">Submit</button>
+	    </div>
+	</div>
+
+
+	<div id="thanks" class="slide js" >
+	    <p  class="big">Thanks so much for your time!</p>
+	</div>
+
+
+  	<div class="progress">
+    	<span>Progress:</span>
+    	<div class="bar-wrapper">
+      	<div class="bar" width="0%">
+      	</div>
+    	</div>
+  	</div>
+
+</body>
+</html>
