@@ -1,0 +1,201 @@
+---
+title: "Using ggplot2 to visualize data"
+author: "jdegen"
+date: "May 17, 2018"
+output: html_document
+---
+
+## What is ggplot2?
+
+ggplot2 is a language created by Hadley Wickham, based on “The Grammar of Graphics” by Wilkinson et al (2005), for describing and creating plots (graphics). Plots can be built up iteratively and updated later.
+
+[Here](http://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf) is a useful "cheat sheet" overview of common ggplot functions. 
+
+## The grammar of graphics
+
+What is a graphic?
+A mapping from **data** to **aesthetic attributes** (e.g., color, shape, size) of **geometric objects** (e.g., points, lines, bars).
+
+#### A graphic 
+
+- may contain statistical **transformations** of the data
+- is drawn on a specific **coordinate system**
+- can use **faceting** for generating the same plot for different subsets of the dataset
+
+## Components of a graphic
+
+#### Minimally:
+
+- **data** and set of **aes**thetic mappings describing how to map variables in data to aesthetic attributes
+- geometric objects (**geom**s) are what you see: points, lines, bars
+
+#### Optional:
+
+- statistical transformations (**stats**) summarise data (e.g., binning, counting observations)
+- **scale**s map values in data space to values in aesthetic space
+- **coord**inate system describes how data coordinates are mapped to graphic plane
+- **facet**ing specification describes how to break data into subsets andreturn an individual plot for each subset (like conditioning)
+
+```{r}
+source("helpers.R")
+library(languageR)
+library(lme4)
+library(tidyverse)
+library(wesanderson)
+data(lexdec)
+```
+
+Set the background to be white instead of gray.
+```{r}
+theme_set(theme_bw())
+```
+
+
+It's always good to start out by understanding your response distribution. You *can* do this with a table. 
+```{r}
+table(lexdec$RT)
+```
+
+But some things are easier to understand by visualization. Here's a histogarm of the response distribution. Always add reasonable/informative axis labels.
+
+```{r}
+ggplot(lexdec, aes(x=RT)) +
+  geom_histogram()  +
+  xlab("Log-transformed reaction time") +
+  ylab("Number of cases")
+
+ggplot(lexdec, aes(x=Frequency, y=RT, color=NativeLanguage)) +
+  geom_point() +
+  geom_smooth(method="lm", color="black") +
+  xlab("Word frequency") +
+  ylab("Log-transformed reaction time") +
+  scale_color_manual(values=c("pink","green"))
+
+```
+
+Plot two overlaid histograms for each native language group separately.
+ 
+```{r}
+ggplot(lexdec, aes(x=RT,fill=NativeLanguage)) +
+  geom_histogram(position="identity",alpha=.5) +
+  xlab("Log-transformed reaction time") +
+  ylab("Number of cases")
+```
+
+Plot density functions instead.
+
+```{r}
+ggplot(lexdec, aes(x=RT,fill=NativeLanguage)) +
+  geom_density(alpha=.5) +
+  xlab("Log-transformed reaction time") +
+  ylab("Number of cases")
+```
+
+To save a plot, use ggsave().
+```{r}
+ggsave(file="graphs/rt_histogram.pdf",width=5,height=4)
+```
+
+Plot response time as a function of frequency with an overlaid linear smoother.
+```{r}
+ggplot(lexdec, aes(x=Frequency,y=RT)) +
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+Plot the frequency effect separately for each subject by using facets.
+
+```{r}
+ggplot(lexdec, aes(x=Frequency,y=RT)) +
+  geom_point() +
+  geom_smooth(method="lm") + 
+  facet_wrap(~Subject)
+```
+
+Plot the frequency effect separately for each native language background, and modify the colors to use the Wes Anderson palette :)
+```{r}
+library(wesanderson)
+mean_rt = mean(lexdec$RT)
+ggplot(lexdec, aes(x=Frequency,y=RT,color=NativeLanguage)) +
+  geom_smooth(method="lm") +
+  geom_point() +
+  # geom_hline(yintercept=mean_rt,linetype="dashed",color="red") +
+  ylab("Log-transformed reaction time") +
+  xlab("Log-transformed CELEX lemma frequency") +
+  scale_color_manual(name="Native language",values=wes_palette("Zissou1")[2:3]) +
+  theme(legend.position="bottom")
+```
+
+
+Plot mean untransformed RT by native language as barplot with error bars. Overlay individual subjects' data points.
+```{r}
+lexdec$rawRT = exp(lexdec$RT)
+agr = lexdec %>%
+  group_by(NativeLanguage) %>%
+  summarize(MeanRT = mean(rawRT), CI.Low = ci.low(rawRT), CI.High = ci.high(rawRT)) %>%
+  mutate(YMin = MeanRT - CI.Low, YMax = MeanRT + CI.High)
+
+agr_subj = lexdec %>%
+  group_by(NativeLanguage,Subject) %>%
+  summarize(MeanRT = mean(rawRT))
+
+
+ggplot(agr, aes(x=NativeLanguage,y=MeanRT)) +
+  geom_bar(stat="identity",color="black",fill="gray60") +
+  geom_point(data=agr_subj, alpha=.4,color="lightblue",size=4) +
+  geom_errorbar(aes(ymin=YMin,ymax=YMax),width=.25) 
+
+ggplot(lexdec, aes(x=NativeLanguage,y=rawRT)) +
+  geom_violin() +
+  geom_point(data=agr,aes(y=MeanRT)) +
+  geom_errorbar(data=agr,aes(y=MeanRT,ymin=YMin,ymax=YMax,width=.24))
+
+ggplot(lexdec, aes(x=NativeLanguage,y=rawRT)) +
+  geom_boxplot()
+
+mydodge = position_dodge(.8)
+
+lexdec = lexdec %>% 
+  mutate(BinnedFrequency = cut_number(Frequency, n=3))
+
+ggplot(lexdec, aes(x=RT,fill=NativeLanguage)) +
+  geom_histogram(position="identity", alpha=.4, binwidth = .05) 
+
+ggplot(lexdec, aes(x=RT,fill=NativeLanguage)) +
+  geom_density(alpha=.4)
+
+ggplot(lexdec, aes(x=RT)) +
+  geom_density() +
+  facet_wrap(~Subject)
+
+ggsave(file="item_variability.pdf")
+```
+
+Visualize as violin plots instead.
+```{r}
+means = lexdec %>%
+  group_by(NativeLanguage) %>%
+  summarize(Mean=mean(rawRT))
+ggplot(lexdec, aes(NativeLanguage,y=rawRT,fill=NativeLanguage)) +
+  geom_violin() +
+  geom_point(data=means,aes(y=Mean))
+```
+
+...or as boxplots.
+
+```{r}
+ggplot(lexdec, aes(NativeLanguage,y=rawRT)) +
+  geom_boxplot()
+```
+
+
+If you want to plot empirical observations against model predictions:
+```{r}
+m = lmer(RT ~ Frequency*NativeLanguage + FamilySize + (1+Frequency+FamilySize|Subject) + (1+NativeLanguage|Word),data=lexdec)
+lexdec$PredictedRT = fitted(m)
+
+ggplot(lexdec, aes(x=PredictedRT,y=RT)) +
+  geom_point(size=.5) +
+  xlab("Model predicted log response times") +
+  ylab("Empirical log response times")
+```

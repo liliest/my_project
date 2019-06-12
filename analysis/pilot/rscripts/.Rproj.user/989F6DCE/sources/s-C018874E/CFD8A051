@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559003467334.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "CFD8A051",
+    "lastKnownWriteTime" : 1560140107,
+    "last_content_update" : 1560199885269,
+    "path" : "~/Desktop/ling245b/my_project/analysis/pilot/rscripts/split_rows.R",
+    "project_path" : "split_rows.R",
+    "properties" : {
+        "cursorPosition" : "114,0",
+        "scrollLine" : "98",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1560136555914.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "A353BE17",
+    "lastKnownWriteTime" : 1554402173,
+    "last_content_update" : 1554402173,
+    "path" : "~/Desktop/ling245b/LINGUIST245B/code_sheets/helpers.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "65,1",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

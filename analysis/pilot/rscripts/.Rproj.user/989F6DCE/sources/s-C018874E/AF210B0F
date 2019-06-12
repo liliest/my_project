@@ -1,0 +1,29 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559939937550.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "AF210B0F",
+    "lastKnownWriteTime" : 6,
+    "last_content_update" : 1559939937550,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "630FA08C",
+        "caption" : "csv_df_lazy",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=csv_df_lazy&cache_key=630FA08C",
+        "displayedObservations" : "230",
+        "environment" : "",
+        "object" : "csv_df_lazy",
+        "preview" : "0",
+        "totalObservations" : "230",
+        "variables" : "9"
+    },
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

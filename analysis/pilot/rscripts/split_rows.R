@@ -1,0 +1,294 @@
+library(tidyverse)
+library(jsonlite)
+library(lme4)
+library(lmerTest)
+library(ordinal)
+theme_set(theme_bw())
+
+csv_df = read_csv("../../../experiments/main/mturk/all_trials.csv")
+
+csv_df = csv_df %>%
+  filter(response != "Salad") %>%
+  filter(response != "Sushi") %>% 
+  filter(response != "Mushrooms") %>%
+  filter(response != "Sandwiches") %>% 
+
+  unite(unique_id, Answer.condition, slide_number, workerid, remove = FALSE)
+  
+csv_df$response = str_replace_all(csv_df$response, "'", '"')
+csv_df$resp_list <- map(csv_df$response, ~ parse_json(.) %>% 
+                          as.data.frame(stringsAsFactors = FALSE))
+
+csv_df %>%
+  unnest(resp_list) %>% 
+  select(unique_id, masc_not:young_old) %>% 
+  gather(condition, value, -unique_id) -> json_long
+
+csv_df <- select(csv_df, -response)
+csv_df <- csv_df %>%
+  left_join(json_long) %>%
+  select(Answer.condition, workerid, stim, response = condition, value)
+
+csv_df %>%
+  distinct(Answer.condition, workerid) %>%
+  mutate(id = 1:n() - 1) %>%
+  left_join(csv_df) %>%
+  select(-workerid) -> csv_df
+
+
+
+csv_df <- csv_df %>% 
+  mutate(conditions = fct_recode(stim, "unaltered gay" = "A", "pitch gay" = "B", "sib gay" = "C",
+                                 "sib pitch gay" = "D", "unaltered straight" = "E", "pitch straight" = "F",
+                                 "sib straight" = "G", "sib pitch straight" = "H"))
+csv_df <- csv_df %>% 
+  mutate(numfeatures = case_when(stim %in% c("A","E") ~ 0,
+                                 stim %in% c("B","C","F","G") ~ 1,
+                                 stim %in% c("D","H") ~ 2))
+csv_df <- csv_df %>% 
+  mutate(original = case_when(stim %in% c("A","B","C","D") ~ "gay",
+                              stim %in% c("E","F","G","H") ~ "straight",
+                              TRUE ~ "decoy"
+    
+  ))
+
+csv_df <- csv_df %>% 
+  filter(stim != "X") %>% 
+  filter(stim != "Y")
+
+tribble(
+  ~ Answer.condition, ~ stim01, ~ stim02,
+  "group_one", "A", "H",
+  "group_two", "B", "G",
+  "group_three", "C", "F",
+  "group_four", "D", "E",
+  "group_five", "E", "D",
+  "group_six", "F", "C",
+  "group_seven", "G", "B",
+  "group_eight", "H", "A"
+) %>%
+  left_join(csv_df) %>%
+  # select(-Answer.condition) %>%
+  filter(!stim %in% c("X", "Y")) -> csv_df
+
+
+csv_df <- csv_df %>% 
+  filter(!stim %in% c("X","Y")) %>% 
+  mutate(orderfactor = if_else(stim01 == stim,0,1)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+csv_df <- csv_df %>% 
+  mutate(response = if_else(response == "masc_not", "greedy", response)) %>% 
+  mutate(response = if_else(response == "fem_not", "hardworking", response)) %>%
+  mutate(response = if_else(response == "educ_un", "promiscuous", response)) %>%
+  mutate(response = if_else(response == "form_cas", "masculine", response)) %>%
+  mutate(response = if_else(response == "prent_unp", "friendly", response)) %>%
+  mutate(response = if_else(response == "lazy_hw", "gay", response)) %>%
+  mutate(response = if_else(response == "smart_stup", "messy", response)) %>%
+  mutate(response = if_else(response == "friend_un", "naive", response)) %>%
+  mutate(response = if_else(response == "funny_un", "mean", response)) %>%
+  mutate(response = if_else(response == "young_old", "fake", response))
+  
+  
+#  
+# bar plot
+#
+
+agr = csv_df %>%
+  filter(!stim %in% c("X","Y")) %>% 
+  group_by(original, conditions, response) %>%
+  mutate(value = as.numeric(as.character(value))) %>% 
+  summarize(mean = mean(value), CI.Low = ci.low(value), CI.High = ci.high(value)) %>%
+  mutate(YMin = mean - CI.Low, YMax = mean + CI.High)
+
+ggplot(agr,
+       aes(x = conditions, y = mean, fill = conditions)
+) +
+  geom_bar(stat = "identity") + 
+  geom_count(data = csv_df %>%
+                filter(!stim %in% c("X","Y")),
+              aes(y = as.numeric(as.character(value))), color = "grey", alpha = .5) +
+  geom_errorbar(aes(ymin = YMin, ymax = YMax), width = .25) +
+  facet_grid(response ~ original, scale = "free") 
+
+
+ggsave(file = "mean_responses.pdf", height = 15, width = 8)
+
+
+#
+# models
+#
+
+# greedy model 
+
+csv_df_greedy <- csv_df %>% filter(response == "greedy") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+greedymodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_greedy)
+summary(greedymodel)
+
+# hardworking model
+
+csv_df_hardworking <- csv_df %>% filter(response == "hardworking") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+hardworkingmodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_hardworking)
+summary(hardworkingmodel)
+
+# promiscuous model
+
+csv_df_promiscuous <- csv_df %>% filter(response == "promiscuous") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+promiscuousmodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_promiscuous)
+summary(promiscuousmodel)
+
+# masculine model
+
+csv_df_masculine <- csv_df %>% filter(response == "masculine") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+masculinemodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_masculine)
+summary(masculinemodel)
+
+# friendly model
+
+csv_df_friendly <- csv_df %>% filter(response == "friendly") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+friendlymodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_friendly)
+summary(friendlymodel)
+
+# gay model
+
+csv_df_gay <- csv_df %>% filter(response == "gay") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+gaymodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_gay)
+summary(gaymodel)
+
+# messy model
+
+csv_df_messy <- csv_df %>% filter(response == "messy") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+messymodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_messy)
+summary(messymodel)
+
+# naive model
+
+csv_df_naive <- csv_df %>% filter(response == "naive") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+naivemodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_naive)
+summary(naivemodel)
+
+# mean model
+
+csv_df_mean <- csv_df %>% filter(response == "mean") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+meanmodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_mean)
+summary(meanmodel)
+
+# fake model
+
+csv_df_fake <- csv_df %>% filter(response == "fake") %>% 
+  filter(!stim %in% c("X","Y")) %>% mutate(value = as.numeric(as.character(value))) %>% 
+  mutate(original = as.factor(original)) %>%
+  mutate(cnumfeatures = numfeatures - mean(numfeatures), coriginal = as.numeric(original) - mean(as.numeric(original))) %>%
+  mutate(factorvalue = as.factor(value)) %>% 
+  mutate(orderfactor = as.factor(orderfactor))
+
+fakemodel = clmm(factorvalue ~ cnumfeatures * coriginal * orderfactor + (1 | id), csv_df_fake)
+summary(fakemodel)
+
+
+
+
+
+
+####
+
+
+
+
+
+
+csv_df %>%
+  left_join(
+    tribble(
+      ~ Answer.condition, ~ comparison,
+      "group_two", "BG/GB",
+      "group_seven", "BG/GB",
+      "group_three", "CF/FC",
+      "group_six", "CF/FC",
+      "group_four", "DE/ED",
+      "group_five", "DE/ED"
+    )
+  ) %>%
+  filter(!is.na(comparison)) %>%
+  mutate(
+    stim_par = paste("(", stim, ")", sep = ""),
+    order = ifelse(stim01 == stim,
+                   paste(stim_par, stim02, sep = "-"),
+                   paste(stim01, stim_par, sep = "-"))
+  ) -> plot_df
+
+plot_df = plot_df %>% 
+  filter(response == "fem_not")
+
+means = plot_df %>% 
+  group_by(order, comparison) %>% 
+  summarize(mean = mean(as.numeric(as.character(value))))
+
+agr = plot_df %>%
+  group_by(order, comparison) %>%
+  mutate(value = as.numeric(as.character(value))) %>% 
+  summarize(mean = mean(value), CI.Low = ci.low(value), CI.High = ci.high(value)) %>%
+  mutate(YMin = mean - CI.Low, YMax = mean + CI.High)
+  
+
+ggplot(agr,
+    aes(x = order, y = mean, fill = order)
+  ) +
+  geom_bar(stat = "identity") + 
+  geom_errorbar(aes(ymin = YMin, ymax = YMax), width = .25) +
+  facet_wrap(~ comparison, scale = "free")
+

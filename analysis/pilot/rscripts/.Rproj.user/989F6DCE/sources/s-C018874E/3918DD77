@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559003450714.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "3918DD77",
+    "lastKnownWriteTime" : 1558388617,
+    "last_content_update" : 1558388617,
+    "path" : "~/Desktop/ling245b/my_project/analysis/pilot/rscripts/merge_results.R",
+    "project_path" : "merge_results.R",
+    "properties" : {
+        "cursorPosition" : "8,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
